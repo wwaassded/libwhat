@@ -1,4 +1,5 @@
 #include "include/socket.h"
+#include <fcntl.h>
 #include <unistd.h>
 
 namespace what::YI_SERVER {
@@ -14,6 +15,13 @@ int Socket::create_by_operator(Protocol pro) {
 Socket::Socket(Socket &&other) {
   fd = other.fd;
   other.fd = -1;
+}
+
+Socket::~Socket() {
+  if (fd != -1) {
+    close(fd);
+    fd = -1;
+  }
 }
 
 Socket &Socket::operator=(Socket &&other) {
@@ -42,7 +50,7 @@ void Socket::Bind(NetAddress &net_address, bool is_reusable) {
 }
 
 void Socket::Listen(NetAddress &net_address) {
-  assert(fd && "can not listen with -1");
+  assert(fd != -1 && "can not listen with -1");
   if (listen(fd, BackLog) == -1) {
     // TODO： 应该添加一个简易的log系统
   }
@@ -63,6 +71,18 @@ void Socket::Reusable() {
       setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof yes)) {
     // TODO： 应该添加一个简易的log系统
   }
+}
+
+void Socket::SetNonBlock() {
+  assert(fd != -1 && "can not set nonblock with -1");
+  if (fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK) == -1) {
+    // TODO： 应该添加一个简易的log系统
+  }
+}
+
+int Socket::GetFL() const {
+  assert(fd != -1 && "can not get fl with -1");
+  return fcntl(fd, F_GETFL);
 }
 
 }  // namespace what::YI_SERVER

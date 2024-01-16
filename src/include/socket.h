@@ -11,6 +11,8 @@ class Socket {
 
   Socket(int _fd) : fd(_fd) {}
 
+  ~Socket();
+
   NON_COPYABLE(Socket)
 
   Socket(Socket &&);
@@ -30,6 +32,8 @@ class Socket {
   void Reusable();
 
   void SetNonBlock();
+
+  int GetFL() const;
 
  private:
   static const int BackLog = 128;
