@@ -9,4 +9,8 @@
   name(const name &) = delete; \
   name &operator=(const name &) = delete;
 
+#define NON_MOVEABLE(name)      \
+  name(const name &&) = delete; \
+  name &operator=(const name &&) = delete;
+
 #endif
