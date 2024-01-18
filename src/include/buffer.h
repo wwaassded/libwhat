@@ -17,8 +17,6 @@ const int BUFFER_INIT_LENGTH = 1024;
 
 class Buffer {
  public:
-  Buffer() noexcept = default;
-
   Buffer(unsigned int init_length = BUFFER_INIT_LENGTH);
 
   Buffer(const Buffer &) = default;

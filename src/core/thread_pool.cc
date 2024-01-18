@@ -8,7 +8,7 @@ ThreadPool::ThreadPool(unsigned int number) {
   else
     thread_number = number;
   for (int i = 0; i < thread_number; ++i) {
-    threads.emplace_back([this]() {
+    threads.emplace_back(std::thread([this]() {
       std::function<void()> task;
       for (;;) {
         {
@@ -20,7 +20,7 @@ ThreadPool::ThreadPool(unsigned int number) {
         }
         task();
       }
-    });
+    }));
   }
 }
 

@@ -67,6 +67,7 @@
     "cinttypes": "cpp",
     "typeinfo": "cpp",
     "set": "cpp",
-    "iostream": "cpp"
+    "iostream": "cpp",
+    "map": "cpp"
   }
 }
