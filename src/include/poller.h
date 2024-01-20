@@ -19,6 +19,7 @@ static constexpr unsigned POLL_ET = EPOLLET;  // 边沿触发
 // TODO Connection类
 class Connection;
 
+//* 对epoll的简单封装
 class Poller {
  public:
   Poller() noexcept = default;
