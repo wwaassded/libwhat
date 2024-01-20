@@ -60,7 +60,7 @@ class Timer {
 
   Timer();
 
-  auto AddSingleTimer(uint64_t expired_from_now, std::function<void()> &call_back) -> SingleTimer *;
+  auto AddSingleTimer(uint64_t expired_from_now, const std::function<void()> &call_back) -> SingleTimer *;
 
   //! 如果成功 target_timer会被置为nullptr
   auto RemoveSingleTimer(SingleTimer *target_timer) -> bool;
@@ -74,7 +74,7 @@ class Timer {
 
   inline auto GetTimerFd() const -> int { return __timer_fd; }
 
-  inline auto GetTimerSocket() -> YI_SERVER::Connection * { return __timer_connection.get(); }
+  inline auto GetTimerConnection() -> YI_SERVER::Connection * { return __timer_connection.get(); }
 
  private:
   struct SingleTimerCompartor {
