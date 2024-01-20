@@ -79,7 +79,7 @@ auto Timer::NextExpiredTime() const -> uint64_t {
   return __timer_queue.begin()->second->GetExpireTime();
 }
 
-auto Timer::AddSingleTimer(uint64_t expired_from_now, std::function<void()> &call_back) -> SingleTimer * {
+auto Timer::AddSingleTimer(uint64_t expired_from_now, const std::function<void()> &call_back) -> SingleTimer * {
   std::unique_lock<std::mutex> lock(locker);
   auto single_timer = std::make_unique<SingleTimer>(expired_from_now, call_back);
   auto raw_new_ptr = single_timer.get();
