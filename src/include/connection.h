@@ -8,9 +8,9 @@
 #include "socket.h"
 #include "util.h"
 
-// TODO class Looper
-
 namespace what::YI_SERVER {
+
+class Looper;
 
 constexpr const static int TMP_BUFFER_SIZE = 2048;
 
@@ -56,7 +56,11 @@ class Connection {
   void Send();
   auto Recv() -> std::pair<ssize_t, bool>;
 
+  void SetLooper(Looper *owner);
+  auto GetLooper() const -> Looper *;
+
  private:
+  Looper *__owner_looper{nullptr};
   uint32_t event{0};
   uint32_t revent{0};
   std::unique_ptr<Socket> __socket;

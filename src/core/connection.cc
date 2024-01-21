@@ -78,4 +78,7 @@ auto Connection::Recv() -> std::pair<ssize_t, bool> {
   return {total, false};
 }
 
+void Connection::SetLooper(Looper *owner) { __owner_looper = owner; }
+auto Connection::GetLooper() const -> Looper * { return __owner_looper; }
+
 }  // namespace what::YI_SERVER
