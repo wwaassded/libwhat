@@ -13,4 +13,8 @@
   name(const name &&) = delete; \
   name &operator=(const name &&) = delete;
 
+#define NON_MOVE_COPYABLE(name) \
+  NON_COPYABLE(name)            \
+  NON_MOVEABLE(name)
+
 #endif

@@ -68,6 +68,8 @@
     "typeinfo": "cpp",
     "set": "cpp",
     "iostream": "cpp",
-    "map": "cpp"
+    "map": "cpp",
+    "iomanip": "cpp",
+    "codecvt": "cpp"
   }
 }
