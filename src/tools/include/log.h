@@ -21,6 +21,8 @@ namespace what::Tools {
 static constexpr int THRESHOLD = 1000;
 static constexpr std::chrono::duration REFRESH_THRESHOLD = std::chrono::milliseconds(3000);
 
+static const std::string LOG_PATH = "test_log.lg";
+
 auto GetNowTime() -> std::chrono::milliseconds;
 
 auto GetNowDate() -> std::string;
@@ -56,7 +58,7 @@ class Logger {
  private:
   Logger(const std::function<void(std::deque<Log> &)> &func);
 
-  void pushMsg(LOG_LEVEL, const std::string &);
+  void pushMsg(Log &&);
 
   void writterFunction();
 
