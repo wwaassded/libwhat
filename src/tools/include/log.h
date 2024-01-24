@@ -52,10 +52,9 @@ class Logger {
 
   ~Logger();
 
-  // TODO logger没有得到恰当的初始化
+ private:
   static auto GetInstance() -> Logger *;
 
- private:
   Logger(const std::function<void(std::deque<Log> &)> &func);
 
   void pushMsg(Log &&);
@@ -70,6 +69,11 @@ class Logger {
   std::mutex locker;
   std::condition_variable cv;
 };
+
+#define LOG_INFO(x) what::Tools::Logger::Msg(what::Tools::LOG_LEVEL::INFO, (x));
+#define LOG_WARNING(x) what::Tools::Logger::Msg(what::Tools::LOG_LEVEL::WARNING, (x));
+#define LOG_ERROR(x) what::Tools::Logger::Msg(what::Tools::LOG_LEVEL::ERROR, (x));
+#define LOG_FATAL(x) what::Tools::Logger::Msg(what::Tools::LOG_LEVEL::FATAL, (x));
 
 }  // namespace what::Tools
 
