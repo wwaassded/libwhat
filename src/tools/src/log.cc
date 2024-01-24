@@ -43,7 +43,6 @@ auto GetNowDate() -> std::string {
   return os.str();
 }
 
-// TODO 没完成的函数 具体的落盘工作应该交由 具体的class来完成
 void PrintToFile(const std::deque<Logger::Log> &logs) {
   Filestream stream{};
   stream.WriteLog(logs);

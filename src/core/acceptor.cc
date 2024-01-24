@@ -1,4 +1,5 @@
 #include "include/acceptor.h"
+#include "tools/include/log.h"
 
 namespace what::YI_SERVER {
 
@@ -25,7 +26,8 @@ void Acceptor::BaseAcceptCallBack(Connection *server_connection) {
   client_connection->GetSocket()->SetNonBlock();
   client_connection->SetCallBack(GetCustomeHandleCallBack());
   int idx = rand() % __reactors.size();
-  // TODO 需要一个可靠的log系统
+  LOG_INFO("new client fd=" + std::to_string(client_connection->GetFd()) + "  maps to reactor[" + std::to_string(idx) +
+           "]");
   client_connection->SetLooper(__reactors[idx]);
   client_connection->Setevent(POLL_READ | POLL_ET);
   __reactors[idx]->AddConnection(std::move(client_connection));
@@ -34,8 +36,8 @@ void Acceptor::BaseAcceptCallBack(Connection *server_connection) {
 // 收到client的信息就刷新链接的维持时间
 void Acceptor::BaseHandleCallBack(Connection *client_connection) {
   auto client_fd = client_connection->GetSocket()->Getfd();
-  if (!client_connection->GetLooper()->RefreshConnection(client_fd)) {
-    // TODO 需要一个可靠的log系统
+  if (client_connection->GetLooper()) {
+    client_connection->GetLooper()->RefreshConnection(client_fd);
   }
 }
 

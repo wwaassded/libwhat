@@ -1,5 +1,6 @@
 #include "include/timer.h"
 #include "../include/poller.h"
+#include "include/log.h"
 
 namespace what::Tools {
 
@@ -53,7 +54,8 @@ auto Timer::SingleTimer::Is_Expired() const -> bool { return NowSinceEpoch() >= 
 /*-------------------- Timer --------------------*/
 Timer::Timer() : __timer_fd(timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK)) {
   if (__timer_fd == -1) {
-    // TODO 需要一个可靠的log系统
+    LOG_FATAL("error in Timer constructor can not create timer_fd");
+    exit(EXIT_FAILURE);
   }
   __timer_connection = std::make_unique<Connection>(std::make_unique<Socket>(__timer_fd));
   __timer_connection->Setevent(POLL_READ | POLL_ET);
@@ -64,7 +66,7 @@ void Timer::handleRead() {  // Timer 的 回调函数
   int expired_times;
   size_t read_bytes = read(__timer_fd, &expired_times, sizeof expired_times);
   if (read_bytes != 8) {  // 对于定时器的读取 一定是 8字节 如果返回值 != 8则说明出现了错误
-    // TODO 需要一个可靠的log系统
+    LOG_ERROR("Timer::handleRead() should read 8 bytes data");
   }
   auto ready_timers = getExpiredSingleTimer();
   for (auto &item : ready_timers) {
@@ -108,7 +110,6 @@ auto Timer::RemoveSingleTimer(SingleTimer *target_timer) -> bool {
 }
 
 //* bug complete
-// FIXME 有一个隐藏的bug
 auto Timer::RefreshSingleTimer(SingleTimer *target_timer, uint64_t expired_from_now) -> SingleTimer * {
   std::unique_lock<std::mutex> lock(locker);
   auto item = __timer_queue.find(target_timer);

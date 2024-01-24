@@ -16,7 +16,6 @@ static constexpr unsigned POLL_READ = EPOLLIN;
 static constexpr unsigned POLL_WRITE = EPOLLOUT;
 static constexpr unsigned POLL_ET = EPOLLET;  // 边沿触发
 
-// TODO Connection类
 class Connection;
 
 //* 对epoll的简单封装

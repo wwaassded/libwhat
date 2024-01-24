@@ -1,4 +1,5 @@
 #include "connection.h"
+#include "tools/include/log.h"
 
 namespace what::YI_SERVER {
 
@@ -38,7 +39,9 @@ void Connection::Send() {
     write = send(GetFd(), buffer + current_len, total_len - current_len, 0);
     if (write <= 0) {
       if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR) {
-        // TODO 合格的log系统
+        LOG_ERROR("error in Connection::Send()");
+        ClearWriteBuffer();
+        return;
       }
       write = 0;
     }
@@ -70,8 +73,9 @@ auto Connection::Recv() -> std::pair<ssize_t, bool> {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
           break;
         }
+      } else {
+        LOG_ERROR("error in Connection::Recv()");
       }
-      // TODO 合格的log系统
       return {read, true};
     }
   }

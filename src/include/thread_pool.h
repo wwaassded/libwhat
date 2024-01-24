@@ -10,6 +10,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include "tools/include/log.h"
 #include "util.h"
 
 namespace what::YI_SERVER {
@@ -27,7 +28,7 @@ class ThreadPool {
   template <class Function, class... ARGS>
   decltype(auto) Submit(Function &&fucntino, ARGS &&...args) {
     if (is_exit) {
-      // TODO： 应该添加一个简易的log系统
+      throw std::runtime_error("thread_pool has been exited");
     }
     using RetType = decltype(fucntino(args...));
     std::shared_ptr<std::packaged_task<RetType()>> item = std::make_shared<std::packaged_task<RetType()>>(
