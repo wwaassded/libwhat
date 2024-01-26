@@ -22,7 +22,7 @@ class Looper {
 
   NON_COPYABLE(Looper);
 
-  void Loop();
+  void Loop() const;
 
   void AddConnection(std::unique_ptr<Connection> new_connection);
 

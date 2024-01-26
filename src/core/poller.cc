@@ -21,11 +21,11 @@ Poller::~Poller() {
   }
 }
 
-void Poller::AddConnection(Connection *connection) {
+void Poller::AddConnection(const Connection *connection) {
   assert(connection->GetFd() != -1 && "can not add invalid fd!");
   epoll_event new_event;
   memset(&new_event, 0, sizeof new_event);
-  new_event.data.ptr = connection;
+  new_event.data.ptr = const_cast<Connection *>(connection);
   new_event.events = connection->Getevent();
   int ret_number = epoll_ctl(__poll_fd, POLL_ADD, connection->GetFd(), &new_event);
   if (ret_number < 0) {

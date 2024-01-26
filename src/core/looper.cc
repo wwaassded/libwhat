@@ -10,11 +10,11 @@ Looper::Looper(uint64_t expire_time)
   }
 }
 
-void Looper::Loop() {
+void Looper::Loop() const {
   while (!exit) {
     Connection *timer_connection = nullptr;
     auto ready_queue = __poller->Poll(TIMEOUT);
-    for (auto &item : ready_queue) {
+    for (const auto &item : ready_queue) {
       if (item == __timer.GetTimerConnection()) {
         timer_connection = item;
         continue;
