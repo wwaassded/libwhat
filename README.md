@@ -2,6 +2,7 @@
 
 ### 代码结构介绍：
 
+<<<<<<< HEAD
 1. acceptor：
    使用 Connection类 __acceptor_connection对所有的链接请求进行相应，通过Poller监听 __acceptor_connection所对应的socket文件描述符调用提供的回调函数，将链接的client平均的分配给acceptor所管理的 reactor
 2. poller：
@@ -18,3 +19,8 @@
    基于c++17的线程池
 8. server：
    包含一个 listener 作为监听acceptor的 looper。 vector管理的执行reactor循环的looper，执行looper循环的Loop函数的thread_pool。用户只需要通过server的OnHandle以及OnAccept成员函数分别设置 读connection就绪以及accept connection就绪的回调函数，并调用begin成员函数开始server的运行
+=======
+*未完待续*
+
+参考：https://github.com/YukunJ/Turtle
+>>>>>>> 98e7c5a59a4edb207a96a6473c861657917ac016
