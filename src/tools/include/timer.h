@@ -23,20 +23,6 @@ auto FromNowInTimeSpec(uint64_t timestamp) -> struct timespec;
 
 void ResetTimerFd(int timerfd, struct timespec new_);
 
-/* Timer结构的介绍
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 class Timer {
  public:
   class SingleTimer {
