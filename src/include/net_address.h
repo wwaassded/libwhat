@@ -12,7 +12,7 @@ enum class Protocol { IPV4 = 0, IPV6 };
 
 class NetAddress {
  public:
-  NetAddress() noexcept = default;
+  NetAddress();
 
   ~NetAddress() noexcept = default;
 
@@ -26,7 +26,18 @@ class NetAddress {
 
   auto GetPort() const -> in_port_t;
 
-  auto GetIP() const -> std::string;
+  auto GetIP() const -> std::string {
+    char ip_address[INET6_ADDRSTRLEN];
+    if (this->protocl == Protocol::IPV4) {
+      auto addr_ipv4 = reinterpret_cast<struct sockaddr_in *>(&__address);
+      auto it = inet_ntop(AF_INET, &addr_ipv4->sin_addr.s_addr, ip_address, INET_ADDRSTRLEN);
+      if (!it) return it;
+    } else {
+      auto addr_ipv6 = reinterpret_cast<struct sockaddr_in6 *>(&__address);
+      inet_ntop(AF_INET6, &addr_ipv6->sin6_addr, ip_address, INET6_ADDRSTRLEN);
+    }
+    return ip_address;
+  }
 
   inline auto GetProtocol() const { return protocl; }
 

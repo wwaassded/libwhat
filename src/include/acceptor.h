@@ -10,7 +10,7 @@ namespace what::YI_SERVER {
 
 class Acceptor {
  public:
-  Acceptor(Looper *listener, std::vector<Looper *> reactors, NetAddress *server_address);
+  Acceptor(Looper *listener, std::vector<Looper *> reactors, NetAddress server_address);
 
   ~Acceptor() = default;
 

@@ -1,10 +1,10 @@
-#include "include/buffer.h"
+#include "../include/buffer.h"
 
 namespace what::YI_SERVER {
 
 const int MAX_BUFFER_INIT_LENGTH = 2048;
 
-Buffer::Buffer(unsigned int init_length = BUFFER_INIT_LENGTH) {
+Buffer::Buffer(unsigned int init_length) {
   _buf.reserve(MAX_BUFFER_INIT_LENGTH < init_length ? MAX_BUFFER_INIT_LENGTH : init_length);
 }
 
@@ -42,11 +42,11 @@ auto Buffer::FindandPopTill(const std::string &target) -> std::optional<std::str
   return ret;
 }
 
-inline auto Buffer::Data() const -> const unsigned char * { return _buf.data(); }
+auto Buffer::Data() const -> const unsigned char * { return _buf.data(); }
 
-inline auto Buffer::Capacity() const -> size_t { return _buf.capacity(); }
+auto Buffer::Capacity() const -> size_t { return _buf.capacity(); }
 
-inline auto Buffer::Size() const -> size_t { return _buf.size(); }
+auto Buffer::Size() const -> size_t { return _buf.size(); }
 
 void Buffer::Clear() { _buf.clear(); }
 

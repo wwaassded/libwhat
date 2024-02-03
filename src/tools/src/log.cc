@@ -1,4 +1,4 @@
-#include "log.h"
+#include "../include/log.h"
 #include <time.h>
 #include <filesystem>
 #include <fstream>
@@ -97,7 +97,6 @@ Logger::~Logger() {
     __writer_thread.join();
   }
 }
-
 void Logger::writterFunction() {
   std::deque<Log> logs;
   while (true) {
@@ -117,5 +116,4 @@ void Logger::writterFunction() {
     }
   }
 }
-
 }  // namespace what::Tools

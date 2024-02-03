@@ -37,8 +37,8 @@ class Socket {
 
  private:
   static const int BackLog = 128;
-  int create_by_operator(Protocol);  //
-  int fd{-1};                        // Socket的文件描述符
+  void create_by_operator(Protocol);  //
+  int fd{-1};                         // Socket的文件描述符
 };
 
 }  // namespace what::YI_SERVER

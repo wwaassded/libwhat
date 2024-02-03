@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <memory>
 #include <vector>
-#include "include/util.h"
+#include "util.h"
 
 namespace what::YI_SERVER {
 
@@ -21,8 +21,6 @@ class Connection;
 //* 对epoll的简单封装
 class Poller {
  public:
-  Poller() noexcept = default;
-
   Poller(uint64_t = MAX_EPOLL_SIZE);
 
   ~Poller();
@@ -33,7 +31,7 @@ class Poller {
 
   auto GetPollSize() const noexcept -> uint64_t;
 
-  NON_COPYABLE(Poller);
+  NON_COPYABLE(Poller)
 
  private:
   int __poll_fd{-1};

@@ -1,13 +1,16 @@
-#include "include/acceptor.h"
-#include "tools/include/log.h"
+#include "../include/acceptor.h"
+#include "../tools/include/log.h"
+#include "../tools/include/log_what.hpp"
 
 namespace what::YI_SERVER {
 
-Acceptor::Acceptor(Looper *listener, std::vector<Looper *> reactors, NetAddress *net_address)
+Acceptor::Acceptor(Looper *listener, std::vector<Looper *> reactors, NetAddress net_address)
     : __reactors(std::move(reactors)) {
   __acceptor_connection = std::make_unique<Connection>(std::make_unique<Socket>());
-  __acceptor_connection->GetSocket()->Bind(*net_address, true);
-  __acceptor_connection->GetSocket()->Listen(*net_address);
+  __acceptor_connection->GetSocket()->Bind(net_address, true);
+  LOG(INFO, "acceptor started to bind");
+  __acceptor_connection->GetSocket()->Listen(net_address);
+  LOG(INFO, "acceptor started to listens");
   __acceptor_connection->Setevent(POLL_READ);
   __acceptor_connection->SetLooper(listener);
   listener->AddAcceptor(__acceptor_connection.get());
@@ -26,8 +29,7 @@ void Acceptor::BaseAcceptCallBack(Connection *server_connection) {
   client_connection->GetSocket()->SetNonBlock();
   client_connection->SetCallBack(GetCustomeHandleCallBack());
   int idx = rand() % __reactors.size();
-  LOG_INFO("new client fd=" + std::to_string(client_connection->GetFd()) + "  maps to reactor[" + std::to_string(idx) +
-           "]");
+  LOG(INFO, "new client fd= %d maps to reactor[%02d]", client_connection->GetFd(), idx);
   client_connection->SetLooper(__reactors[idx]);
   client_connection->Setevent(POLL_READ | POLL_ET);
   __reactors[idx]->AddConnection(std::move(client_connection));

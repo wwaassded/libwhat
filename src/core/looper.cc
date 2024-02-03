@@ -1,5 +1,6 @@
-#include "include/looper.h"
-#include "tools/include/log.h"
+#include "../include/looper.h"
+#include "../tools/include/log.h"
+#include "../tools/include/log_what.hpp"
 
 namespace what::YI_SERVER {
 
@@ -33,7 +34,7 @@ void Looper::AddConnection(std::unique_ptr<Connection> new_connection) {
   connections.emplace(new_fd, std::move(new_connection));
   if (use_timer) {
     Tools::Timer::SingleTimer *new_timer = __timer.AddSingleTimer(__expire_time, [new_fd, this] {
-      LOG_INFO("client fd=" + std::to_string(new_fd) + " is deleted after timeout");
+      LOG(INFO, "client fd= %s is deleted after timeout", std::to_string(new_fd));
       // 可能需要通知对端 链接将会被删除
       DeleteConnection(new_fd);
     });
@@ -65,7 +66,7 @@ auto Looper::DeleteConnection(int fd) -> bool {
   if (use_timer) {
     auto it = single_timers.find(fd);
     if (it == single_timers.end()) {
-      LOG_ERROR("Looper::DeleteConnection() client fd=" + std::to_string(fd) + " is not in timer");
+      LOG(ERROR, "Looper::DeleteConnection() client fd= %s is not in timer", std::to_string(fd));
     }
     __timer.RemoveSingleTimer(it->second);
     single_timers.erase(fd);

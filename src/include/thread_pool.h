@@ -10,7 +10,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-#include "tools/include/log.h"
+#include "../tools/include/log_what.hpp"
 #include "util.h"
 
 namespace what::YI_SERVER {
@@ -27,7 +27,8 @@ class ThreadPool {
 
   template <class Function, class... ARGS>
   decltype(auto) Submit(Function &&fucntino, ARGS &&...args) {
-    if (is_exit) {
+    if (is_exit.load(std::memory_order_acquire)) {
+      LOG(ERROR, "thread_pool is exit");
       throw std::runtime_error("thread_pool has been exited");
     }
     using RetType = decltype(fucntino(args...));

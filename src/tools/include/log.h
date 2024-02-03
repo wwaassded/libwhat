@@ -13,8 +13,7 @@
 #include <sstream>
 #include <string>
 #include <thread>
-
-#include "../include/util.h"
+#include "../../include/util.h"
 
 namespace what::Tools {
 
@@ -46,7 +45,7 @@ class Logger {
 
     std::string message;
   };
-  NON_MOVE_COPYABLE(Logger);
+  NON_MOVE_COPYABLE(Logger)
 
   static void Msg(LOG_LEVEL, const std::string &);
 

@@ -9,8 +9,8 @@
 #include <map>
 #include <memory>
 #include <mutex>
-#include "../include/connection.h"
-#include "../include/socket.h"
+#include "../../include/connection.h"
+#include "../../include/socket.h"
 
 namespace what::Tools {
 
@@ -64,7 +64,7 @@ class Timer {
 
  private:
   struct SingleTimerCompartor {
-    auto operator()(SingleTimer *a, SingleTimer *b) -> bool;
+    auto operator()(const SingleTimer *a, const SingleTimer *b) const -> bool;
   };
 
   void handleRead();

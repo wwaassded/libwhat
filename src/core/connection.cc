@@ -1,9 +1,10 @@
-#include "connection.h"
-#include "tools/include/log.h"
+#include "../include/connection.h"
+#include "../tools/include/log.h"
+#include "../tools/include/log_what.hpp"
 
 namespace what::YI_SERVER {
 
-explicit Connection::Connection(std::unique_ptr<Socket> sock)
+Connection::Connection(std::unique_ptr<Socket> sock)
     : __socket(std::move(sock)),
       __read_buffer(std::make_unique<Buffer>()),
       __write_buffer(std::make_unique<Buffer>()) {}
@@ -34,12 +35,12 @@ void Connection::Send() {
   ssize_t current_len = 0;
   ssize_t write;
   ssize_t total_len = GetWriteBufferSize();
-  const unsigned char *buffer = __write_buffer->Data();
+  const unsigned char *buffer = this->__write_buffer->Data();
   while (current_len < total_len) {
     write = send(GetFd(), buffer + current_len, total_len - current_len, 0);
     if (write <= 0) {
       if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR) {
-        LOG_ERROR("error in Connection::Send()");
+        LOG(ERROR, "error in Connection::Send()");
         ClearWriteBuffer();
         return;
       }
@@ -75,6 +76,7 @@ auto Connection::Recv() -> std::pair<ssize_t, bool> {
         }
       } else {
         LOG_ERROR("error in Connection::Recv()");
+        LOG(ERROR, "error in Connection::Recv()");
       }
       return {read, true};
     }

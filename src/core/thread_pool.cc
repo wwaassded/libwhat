@@ -1,8 +1,9 @@
-#include "include/thread_pool.h"
+#include "../include/thread_pool.h"
 
 namespace what::YI_SERVER {
 
 ThreadPool::ThreadPool(unsigned int number) {
+  is_exit.store(false, std::memory_order_release);
   if (number < MIN_THREAD_NUMBER)
     thread_number = MIN_THREAD_NUMBER;
   else
@@ -22,6 +23,7 @@ ThreadPool::ThreadPool(unsigned int number) {
       }
     }));
   }
+  LOG(INFO, "thread_poll init successfully!");
 }
 
 void ThreadPool::Exit() {
@@ -29,6 +31,7 @@ void ThreadPool::Exit() {
     is_exit = true;
     cv.notify_all();
   }
+  LOG(INFO, "thread_poll exit!");
 }
 
 ThreadPool::~ThreadPool() {

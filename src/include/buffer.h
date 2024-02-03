@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
-#include "include/util.h"
+#include "../include/util.h"
 
 /*
  * not thread-safe
@@ -23,7 +23,7 @@ class Buffer {
 
   Buffer &operator=(const Buffer &) = default;
 
-  NON_MOVEABLE(Buffer);
+  NON_MOVEABLE(Buffer)
 
   ~Buffer() noexcept = default;
 

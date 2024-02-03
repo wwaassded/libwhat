@@ -1,4 +1,5 @@
-#include "include/net_address.h"
+#include "../include/net_address.h"
+#include "../tools/include/log_what.hpp"
 
 namespace what::YI_SERVER {
 
@@ -15,13 +16,15 @@ NetAddress::NetAddress(const char *ip, in_port_t port, Protocol __protocol) : pr
   if (IS_IPV4(protocl)) {
     auto ipv4_address = reinterpret_cast<sockaddr_in *>(&__address);
     ipv4_address->sin_family = AF_INET;
-    ipv4_address->sin_port = port;
-    inet_pton(ipv4_address->sin_family, ip, &ipv4_address->sin_addr.s_addr);
+    ipv4_address->sin_port = htons(port);
+    ipv4_address->sin_addr.s_addr = inet_addr(ip);
+    this->__add_len = sizeof(sockaddr_in);
   } else {
     auto ipv6_address = reinterpret_cast<sockaddr_in6 *>(&__address);
     ipv6_address->sin6_family = AF_INET6;
     ipv6_address->sin6_port = port;
     inet_pton(ipv6_address->sin6_family, ip, ipv6_address->sin6_addr.s6_addr);
+    this->__add_len = sizeof(sockaddr_in6);
   }
 }
 
@@ -33,19 +36,6 @@ auto NetAddress::GetSockLen() -> socklen_t * { return &__add_len; }
 /// 可能更像是 c语言代码？🐶
 auto NetAddress::GetPort() const -> in_port_t {
   return *(reinterpret_cast<in_port_t *>(reinterpret_cast<sockaddr *>(&__address)->sa_data));
-}
-
-auto NetAddress::GetIP() const -> std::string {
-  int ip_len = protocl == Protocol::IPV4 ? 4 : 16;
-  char ip[ip_len];
-  if (IS_IPV4(protocl)) {
-    auto ipv4_address = reinterpret_cast<sockaddr_in *>(&__address);
-    inet_ntop(ipv4_address->sin_family, &ipv4_address->sin_addr.s_addr, ip, ip_len);
-  } else {
-    auto ipv6_address = reinterpret_cast<sockaddr_in6 *>(&__address);
-    inet_ntop(ipv6_address->sin6_family, ipv6_address->sin6_addr.s6_addr, ip, ip_len);
-  }
-  return std::string(ip);
 }
 
 auto NetAddress::ToString() const -> std::string { return std::to_string(GetPort()) + "@" + ToString(); }

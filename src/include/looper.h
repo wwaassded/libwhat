@@ -2,9 +2,9 @@
 #define LOOPER_H
 
 #include "../tools/include/timer.h"
-#include "include/connection.h"
-#include "include/poller.h"
-#include "include/util.h"
+#include "connection.h"
+#include "poller.h"
+#include "util.h"
 
 namespace what::YI_SERVER {
 
@@ -20,7 +20,7 @@ class Looper {
 
   ~Looper() = default;
 
-  NON_COPYABLE(Looper);
+  NON_COPYABLE(Looper)
 
   void Loop() const;
 

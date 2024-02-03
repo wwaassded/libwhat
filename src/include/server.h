@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include "../tools/include/log_what.hpp"
 #include "acceptor.h"
 #include "connection.h"
 #include "looper.h"
@@ -20,8 +21,12 @@ namespace what::YI_SERVER {
 
 class Server {
  public:
-  Server(NetAddress &server_address, int concurrency = std::thread::hardware_concurrency() - 1)
+  Server(NetAddress server_address, int concurrency = std::thread::hardware_concurrency() - 1)
       : __thread_pool(std::make_unique<ThreadPool>(concurrency)), __listener(std::make_unique<Looper>()) {
+    what::Log::Add_file("log/log.txt", what::Log::FileMode::Truncate, what::Log::Verbosity::VerbosityMESSAGE);
+    what::Log::flush_interval_ms = 100;
+    what::Log::Init(0, nullptr);
+    what::Log::Set_thread_name("Main Thread");
     for (unsigned int i = 0; i < __thread_pool->GetSize(); ++i) {
       __reactors.push_back(std::make_unique<Looper>(TIME_EXPIRATION));
     }
@@ -32,7 +37,8 @@ class Server {
     raw_reactors.reserve(__reactors.size());
     std::transform(__reactors.begin(), __reactors.end(), std::back_inserter(raw_reactors),
                    [](auto &it) { return it.get(); });
-    __acceptor = std::make_unique<Acceptor>(__listener.get(), raw_reactors, &server_address);
+    __acceptor = std::make_unique<Acceptor>(__listener.get(), raw_reactors, server_address);
+    LOG(INFO, "acceptor init successfully!");
   }
 
   ~Server() = default;
@@ -52,6 +58,7 @@ class Server {
     if (!is_Handled) {
       throw std::logic_error("please set handle function before Begin()");
     }
+    LOG(INFO, "listener started to loop");
     __listener->Loop();
   }
 

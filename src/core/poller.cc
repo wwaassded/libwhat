@@ -1,10 +1,10 @@
-#include "include/poller.h"
-#include "include/connection.h"
-#include "tools/include/log.h"
+#include "../include/poller.h"
+#include "../include/connection.h"
+#include "../tools/include/log.h"
 
 namespace what::YI_SERVER {
 
-Poller::Poller(uint64_t poll_len = MAX_EPOLL_SIZE) : __poll_size(poll_len) {
+Poller::Poller(uint64_t poll_len) : __poll_size(poll_len) {
   __poll_fd = epoll_create1(0);
   if (__poll_fd == -1) {
     perror("Poller: epoll_create1() error");
@@ -34,7 +34,7 @@ void Poller::AddConnection(const Connection *connection) {
   }
 }
 
-auto Poller::Poll(int timeout = -1) -> std::vector<Connection *> {
+auto Poller::Poll(int timeout) -> std::vector<Connection *> {
   std::vector<Connection *> ready_connections;
   int ready_number = epoll_wait(__poll_fd, __ready_events, __poll_size, timeout);
   if (ready_number == -1) {
