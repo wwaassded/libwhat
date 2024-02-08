@@ -1,7 +1,6 @@
 .*
 .clang-format
 main.cc
-test/
 .vscode/
 build/
 *.o

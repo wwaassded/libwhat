@@ -20,7 +20,6 @@ void Looper::Loop() const {
         timer_connection = item;
         continue;
       }
-      if (item->GetCallBack() == nullptr) assert(false);
       item->GetCallBack()();
     }
     //* 超时链接最后处理，以免链接事件处理前被删除

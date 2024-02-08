@@ -28,11 +28,11 @@ void Acceptor::BaseAcceptCallBack(Connection *server_connection) {
     return;
   }
   auto client_sock = std::make_unique<Socket>(client_fd);
-  client_sock->SetNonBlock();
+  client_sock->SetNonBlock();  // socket设置为非阻塞
   auto client_connection = std::make_unique<Connection>(std::move(client_sock));
-  client_connection->Setevent(POLL_READ | POLL_ET);
+  client_connection->Setevent(POLL_READ | POLL_ET);  // epoll设置为边沿触发
   client_connection->SetCallBack(GetCustomeHandleCallBack());
-  int idx = rand() % __reactors.size();
+  int idx = rand() % __reactors.size();  //随机的分配给从属reactors
   LOG(ERROR, "new client fd= %d maps to reactor[%02d]", client_connection->GetFd(), idx);
   client_connection->SetLooper(__reactors[idx]);
   __reactors[idx]->AddConnection(std::move(client_connection));

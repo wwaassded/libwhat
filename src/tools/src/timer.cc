@@ -36,7 +36,7 @@ void ResetTimerFd(int timerfd, struct timespec new_) {
   memset(&__old, 0, sizeof __old);
   memset(&__new, 0, sizeof __new);
   __new.it_value = new_;
-  int number = timerfd_settime(timerfd, 0, &__new, &__old);
+  int number = timerfd_settime(timerfd, 0, &__new, &__old);  //__flags设置为0 timerfd_settime 采用相对时间
 }
 
 /*-------------------- Single timer --------------------*/
@@ -58,6 +58,7 @@ Timer::Timer() : __timer_fd(timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NO
     LOG(ERROR, "error in Timer constructor can not create timer_fd");
     exit(EXIT_FAILURE);
   }
+  // timer_fd 也可以封装成为一个connection 交由 poller来监听时钟
   __timer_connection = std::make_unique<Connection>(std::make_unique<Socket>(__timer_fd));
   __timer_connection->Setevent(POLL_READ | POLL_ET);
   __timer_connection->SetCallBack(std::bind(&Timer::handleRead, this));
@@ -66,9 +67,9 @@ Timer::Timer() : __timer_fd(timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NO
 void Timer::handleRead() {  // Timer 的 回调函数
   int expired_times;
   ssize_t read_bytes = read(__timer_fd, &expired_times, sizeof(expired_times));
-  if (read_bytes != 8) {  // 对于定时器的读取 一定是 8字节 如果返回值 != 8则说明出现了错误
-    LOG(ERROR, "Timer::handleRead() should read 8 bytes data but: %lu", read_bytes);
-  }
+  // if (read_bytes != 8) {  // 对于定时器的读取 一定是 8字节 如果返回值 != 8则说明出现了错误
+  //   LOG(ERROR, "Timer::handleRead() should read 8 bytes data but: %lu", read_bytes);
+  // }
   auto ready_timers = getExpiredSingleTimer();
   for (auto &item : ready_timers) {
     item->Run();
