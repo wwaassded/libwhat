@@ -35,12 +35,12 @@ class Looper {
   inline void SetExit() { exit = true; }
 
  private:
-  std::unique_ptr<Poller> __poller;
-  mutable Tools::Timer __timer{};
-  std::map<int, std::unique_ptr<Connection>> connections;
-  std::map<int, Tools::Timer::SingleTimer *> single_timers;
+  std::unique_ptr<Poller> __poller;  // looper的核心 poller执行epoll完成io多路监听
+  mutable Tools::Timer __timer{};  //定时器对 looper监听的connection进行计时 删除掉超时的链接 具体实现见 tools/timer
+  std::map<int, std::unique_ptr<Connection>> connections;    //管理 所有的connection
+  std::map<int, Tools::Timer::SingleTimer *> single_timers;  // connection对应一个singletimer
   std::mutex locker;
-  uint64_t __expire_time{0};
+  uint64_t __expire_time{0};  //超时的期限 ms
   bool use_timer{false};
   bool exit{false};
 };

@@ -22,7 +22,7 @@ NetAddress::NetAddress(const char *ip, in_port_t port, Protocol __protocol) : pr
   } else {
     auto ipv6_address = reinterpret_cast<sockaddr_in6 *>(&__address);
     ipv6_address->sin6_family = AF_INET6;
-    ipv6_address->sin6_port = port;
+    ipv6_address->sin6_port = htons(port);
     inet_pton(ipv6_address->sin6_family, ip, ipv6_address->sin6_addr.s6_addr);
     this->__add_len = sizeof(sockaddr_in6);
   }
@@ -35,10 +35,10 @@ auto NetAddress::GetSockLen() -> socklen_t * { return &__add_len; }
 //? 详情 请仔细观察 sockaddr 以及 sockaddr_in6 和 sockaddr_in 结构之间的关系
 /// 可能更像是 c语言代码？🐶
 auto NetAddress::GetPort() const -> in_port_t {
-  return *(reinterpret_cast<in_port_t *>(reinterpret_cast<sockaddr *>(&__address)->sa_data));
+  return ntohs(*(reinterpret_cast<in_port_t *>(reinterpret_cast<sockaddr *>(&__address)->sa_data)));
 }
 
-auto NetAddress::ToString() const -> std::string { return std::to_string(GetPort()) + "@" + ToString(); }
+auto NetAddress::ToString() const -> std::string { return std::to_string(GetPort()) + "@" + GetIP(); }
 
 auto operator<<(std::ostream &os, const NetAddress &net_address) -> std::ostream & {
   return os << net_address.ToString();

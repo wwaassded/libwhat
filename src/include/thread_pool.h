@@ -26,16 +26,16 @@ class ThreadPool {
   auto GetSize() const -> size_t;
 
   template <class Function, class... ARGS>
-  decltype(auto) Submit(Function &&fucntino, ARGS &&...args) {
+  decltype(auto) Submit(Function &&function, ARGS &&...args) {
     if (is_exit) {
       LOG(ERROR, "thread_pool is exit");
       throw std::runtime_error("thread_pool has been exited");
     }
-    using RetType = decltype(fucntino(args...));
+    using RetType = decltype(function(args...));
     std::shared_ptr<std::packaged_task<RetType()>> item = std::make_shared<std::packaged_task<RetType()>>(
-        std::bind(std::forward<Function>(fucntino), std::forward<ARGS>(args)...));
+        std::bind(std::forward<Function>(function), std::forward<ARGS>(args)...));
     std::future<RetType> future = item->get_future();
-    {
+    {  // 限制🔒的粒度
       std::unique_lock<std::mutex> lock(locker);
       task_deque.emplace_back([item] { (*item)(); });
     }

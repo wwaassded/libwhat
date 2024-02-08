@@ -4,3 +4,4 @@ main.cc
 test/
 .vscode/
 build/
+*.o

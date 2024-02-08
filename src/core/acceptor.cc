@@ -10,9 +10,9 @@ Acceptor::Acceptor(Looper *listener, std::vector<Looper *> reactors, NetAddress 
   sock->Bind(net_address, true);
   sock->Listen();
   __acceptor_connection = std::make_unique<Connection>(std::move(sock));
-  __acceptor_connection->Setevent(POLL_READ);
+  __acceptor_connection->Setevent(POLL_READ);  // 水平触发
   __acceptor_connection->SetLooper(listener);
-  listener->AddAcceptor(__acceptor_connection.get());
+  listener->AddAcceptor(__acceptor_connection.get());  //将acceptor添加到listener_looper中
   /* 默认的用户定制回调函数 */
   SetCustomeAcceptCallBack([](Connection *) {});
   SetCustomeHandleCallBack([](Connection *) {});
@@ -39,7 +39,7 @@ void Acceptor::BaseAcceptCallBack(Connection *server_connection) {
   LOG(WARNING, "accept client completed");
 }
 
-// 收到client的信息就刷新链接的维持时间
+// 收到client的信息就刷新链接的维持时间,需要客户给出更为具体的回调函数
 void Acceptor::BaseHandleCallBack(Connection *client_connection) {
   int client_fd = client_connection->GetSocket()->Getfd();
   if (client_connection->GetLooper()) {

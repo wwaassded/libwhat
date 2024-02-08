@@ -26,10 +26,10 @@ class Acceptor {
   auto GetAcceptorConnection() noexcept -> Connection *;
 
  private:
-  std::vector<Looper *> __reactors;
-  std::unique_ptr<Connection> __acceptor_connection;
-  std::function<void(Connection *)> custome_accept_callback{};
-  std::function<void(Connection *)> custome_handle_callback{};
+  std::vector<Looper *> __reactors;                             // 从属的reactors acceptor为其分发任务
+  std::unique_ptr<Connection> __acceptor_connection;            // 管理 用于处理链接的socket
+  std::function<void(Connection *)> custome_accept_callback{};  // 新连接到来时 acceptor的回调函数
+  std::function<void(Connection *)> custome_handle_callback{};  // client_connection可读时的回调函数
 };
 
 }  // namespace what::YI_SERVER
