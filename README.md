@@ -13,12 +13,13 @@
    connection封装socket文件描述符 以及读写所需要的缓冲
 5. timer：
    基于timerfd+epoll实现的简易定时器，通过TFD_NONBLOCK设置为非阻塞的timerfd，并交由poller进行监听。其内置singletimer helper类，timer不断地更新last_expired_time，并交由timerfd_set函数设置timerfd的定时时长，poller响应后通过timerfd的回调函数，寻找所有已经过时的singletimer并调用它们的回调函数，完成计时。timer内部采用std::map管理singletimer并依据超时时间排序辅助以上功能的实现，(TODO)若考虑性能优化，也可以将map优化成自己编写的小根堆或红黑树
-6. logger：
+6. ~logger(log_info)~：现已弃用
    异步log，单独的writter通过condition_variable进行线程间的同步执行writterFunction，提供__write_function成员变量，提供给用户设置完成落盘任务的自定义函数，writterFunction会自动调用__write_function函数，完成任务
 7. thread_pool:
    基于c++17的线程池
 8. server：
    包含一个 listener 作为监听acceptor的 looper。 vector管理的执行reactor循环的looper，执行looper循环的Loop函数的thread_pool。用户只需要通过server的OnHandle以及OnAccept成员函数分别设置 读connection就绪以及accept connection就绪的回调函数，并调用begin成员函数开始server的运行
+9.LOG：详见log_what
 =======
 
 LOG 无法使用 因为没有 链接动态链接库 log_what的动态链接库的获取可以参看 log_what项目
