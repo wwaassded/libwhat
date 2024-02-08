@@ -20,7 +20,8 @@
 8. server：
    包含一个 listener 作为监听acceptor的 looper。 vector管理的执行reactor循环的looper，执行looper循环的Loop函数的thread_pool。用户只需要通过server的OnHandle以及OnAccept成员函数分别设置 读connection就绪以及accept connection就绪的回调函数，并调用begin成员函数开始server的运行
 =======
-*未完待续*
+
+LOG 无法使用 因为没有 链接动态链接库 log_what的动态链接库的获取可以参看 log_what项目
 
 参考：https://github.com/YukunJ/Turtle
 >>>>>>> 98e7c5a59a4edb207a96a6473c861657917ac016
