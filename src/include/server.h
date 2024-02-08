@@ -24,7 +24,7 @@ class Server {
   Server(NetAddress server_address, int concurrency = std::thread::hardware_concurrency() - 1)
       : __thread_pool(std::make_unique<ThreadPool>(concurrency)), __listener(std::make_unique<Looper>()) {
     what::Log::Add_file("log/log.txt", what::Log::FileMode::Truncate, what::Log::Verbosity::VerbosityMESSAGE);
-    what::Log::flush_interval_ms = 100;
+    what::Log::flush_interval_ms = 0;
     what::Log::Init(0, nullptr);
     what::Log::Set_thread_name("Main Thread");
     for (unsigned int i = 0; i < __thread_pool->GetSize(); ++i) {

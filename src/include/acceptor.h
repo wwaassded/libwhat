@@ -23,6 +23,8 @@ class Acceptor {
   auto GetCustomeAcceptCallBack() const -> std::function<void(Connection *)>;
   auto GetCustomeHandleCallBack() const -> std::function<void(Connection *)>;
 
+  auto GetAcceptorConnection() noexcept -> Connection *;
+
  private:
   std::vector<Looper *> __reactors;
   std::unique_ptr<Connection> __acceptor_connection;

@@ -4,9 +4,7 @@ namespace what::YI_SERVER {
 
 const int MAX_BUFFER_INIT_LENGTH = 2048;
 
-Buffer::Buffer(unsigned int init_length) {
-  _buf.reserve(MAX_BUFFER_INIT_LENGTH < init_length ? MAX_BUFFER_INIT_LENGTH : init_length);
-}
+Buffer::Buffer(unsigned int init_length) { _buf.reserve(init_length); }
 
 void Buffer::Append(const unsigned char *str, size_t str_len) {
   assert(str);

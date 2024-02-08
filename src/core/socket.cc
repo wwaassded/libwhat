@@ -1,6 +1,7 @@
 #include "../include/socket.h"
 #include <fcntl.h>
 #include <unistd.h>
+#include <cassert>
 #include <stdexcept>
 #include "../tools/include/log.h"
 #include "../tools/include/log_what.hpp"
@@ -8,11 +9,14 @@
 namespace what::YI_SERVER {
 
 void Socket::create_by_operator(Protocol pro) {
-  fd = socket(pro == Protocol::IPV4 ? AF_INET : AF_INET6, SOCK_STREAM,
-              0);  // 创建 IPV4 或 IPV6 的 socket文件描述符 采用tcp
-  if (fd < 0) {
-    LOG(ERROR, "Socket::create_by_operator() can not create socket fd");
-    throw std::logic_error("can not open socket");
+  if (pro == Protocol::IPV4) {
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+  } else {
+    fd = socket(AF_INET6, SOCK_STREAM, 0);
+  }
+  if (fd == -1) {
+    LOG(ERROR, "Socket: socket() error");
+    throw std::logic_error("Socket: socket() error");
   }
 }
 
@@ -56,7 +60,7 @@ void Socket::Bind(NetAddress &net_address, bool is_reusable) {
   }
 }
 
-void Socket::Listen(NetAddress &net_address) {
+void Socket::Listen() {
   assert(fd != -1 && "can not listen with -1");
   if (listen(fd, BackLog) == -1) {
     LOG(ERROR, "error in Socket::Listen()");
@@ -65,6 +69,7 @@ void Socket::Listen(NetAddress &net_address) {
 }
 
 int Socket::Accept(NetAddress &client_address) {
+  assert(fd != -1 && "can not listen with -1");
   int _fd = accept(fd, client_address.GetSockaddr(), client_address.GetSockLen());
   if (_fd == -1) {
     LOG(ERROR, "fail to accept new client fd");

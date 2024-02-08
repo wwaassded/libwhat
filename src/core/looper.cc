@@ -13,13 +13,14 @@ Looper::Looper(uint64_t expire_time)
 
 void Looper::Loop() const {
   while (!exit) {
+    std::vector<Connection *> ready_queue = __poller->Poll(TIMEOUT);
     Connection *timer_connection = nullptr;
-    auto ready_queue = __poller->Poll(TIMEOUT);
-    for (const auto &item : ready_queue) {
+    for (auto &item : ready_queue) {
       if (item == __timer.GetTimerConnection()) {
         timer_connection = item;
         continue;
       }
+      if (item->GetCallBack() == nullptr) assert(false);
       item->GetCallBack()();
     }
     //* 超时链接最后处理，以免链接事件处理前被删除
@@ -31,12 +32,12 @@ void Looper::AddConnection(std::unique_ptr<Connection> new_connection) {
   std::unique_lock<std::mutex> lock(locker);
   __poller->AddConnection(new_connection.get());
   auto new_fd = new_connection->GetFd();
-  connections.emplace(new_fd, std::move(new_connection));
+  connections.insert({new_fd, std::move(new_connection)});
   if (use_timer) {
-    Tools::Timer::SingleTimer *new_timer = __timer.AddSingleTimer(__expire_time, [new_fd, this] {
-      LOG(INFO, "client fd= %s is deleted after timeout", std::to_string(new_fd));
+    Tools::Timer::SingleTimer *new_timer = __timer.AddSingleTimer(__expire_time, [this, fd = new_fd] {
+      LOG(INFO, "client fd= %d is deleted after timeout", fd);
       // 可能需要通知对端 链接将会被删除
-      DeleteConnection(new_fd);
+      DeleteConnection(fd);
     });
     single_timers.insert({new_fd, new_timer});
   }
@@ -49,7 +50,7 @@ auto Looper::RefreshConnection(int fd) -> bool {
   if (use_timer && item != single_timers.end()) {
     auto new_timer = __timer.RefreshSingleTimer(item->second, __expire_time);
     if (new_timer != nullptr) {
-      single_timers[fd] = new_timer;
+      single_timers.insert({fd, new_timer});
     }
     return true;
   }
@@ -65,11 +66,12 @@ auto Looper::DeleteConnection(int fd) -> bool {
   connections.erase(item);
   if (use_timer) {
     auto it = single_timers.find(fd);
-    if (it == single_timers.end()) {
+    if (it != single_timers.end()) {
+      __timer.RemoveSingleTimer(it->second);
+      single_timers.erase(fd);
+    } else {
       LOG(ERROR, "Looper::DeleteConnection() client fd= %s is not in timer", std::to_string(fd));
     }
-    __timer.RemoveSingleTimer(it->second);
-    single_timers.erase(fd);
   }
   return true;
 }

@@ -24,10 +24,10 @@ class Connection {
 
   inline auto GetSocket() const -> Socket * { return __socket.get(); }
 
-  void SetCallBack(std::function<void(Connection *)> your_function) {
-    call_back = [this, &your_function] { your_function(this); };
+  void SetCallBack(const std::function<void(Connection *)> &your_function) {
+    call_back = [your_function, this] { return your_function(this); };
   }
-  inline auto GetCallBack() const -> std::function<void()> { return call_back; }
+  inline auto GetCallBack() noexcept -> std::function<void()> { return call_back; }
 
   /* for poller */
   inline auto Getevent() const -> uint32_t { return event; }
@@ -66,7 +66,7 @@ class Connection {
   std::unique_ptr<Socket> __socket;
   std::unique_ptr<Buffer> __read_buffer;
   std::unique_ptr<Buffer> __write_buffer;
-  std::function<void()> call_back;
+  std::function<void()> call_back{nullptr};
 };
 
 }  // namespace what::YI_SERVER

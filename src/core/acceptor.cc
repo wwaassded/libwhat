@@ -6,38 +6,42 @@ namespace what::YI_SERVER {
 
 Acceptor::Acceptor(Looper *listener, std::vector<Looper *> reactors, NetAddress net_address)
     : __reactors(std::move(reactors)) {
-  __acceptor_connection = std::make_unique<Connection>(std::make_unique<Socket>());
-  __acceptor_connection->GetSocket()->Bind(net_address, true);
-  LOG(INFO, "acceptor started to bind");
-  __acceptor_connection->GetSocket()->Listen(net_address);
-  LOG(INFO, "acceptor started to listens");
+  auto sock = std::make_unique<Socket>();
+  sock->Bind(net_address, true);
+  sock->Listen();
+  __acceptor_connection = std::make_unique<Connection>(std::move(sock));
   __acceptor_connection->Setevent(POLL_READ);
   __acceptor_connection->SetLooper(listener);
   listener->AddAcceptor(__acceptor_connection.get());
   /* 默认的用户定制回调函数 */
   SetCustomeAcceptCallBack([](Connection *) {});
   SetCustomeHandleCallBack([](Connection *) {});
+  LOG(INFO, "set acceptor call back successfully");
 }
 
 void Acceptor::BaseAcceptCallBack(Connection *server_connection) {
+  LOG(WARNING, "started to accept client");
   NetAddress client_address;
   int client_fd = __acceptor_connection->GetSocket()->Accept(client_address);
   if (client_fd == -1) {
+    LOG(ERROR, "failed to accept");
     return;
   }
-  std::unique_ptr<Connection> client_connection = std::make_unique<Connection>(std::make_unique<Socket>(client_fd));
-  client_connection->GetSocket()->SetNonBlock();
+  auto client_sock = std::make_unique<Socket>(client_fd);
+  client_sock->SetNonBlock();
+  auto client_connection = std::make_unique<Connection>(std::move(client_sock));
+  client_connection->Setevent(POLL_READ | POLL_ET);
   client_connection->SetCallBack(GetCustomeHandleCallBack());
   int idx = rand() % __reactors.size();
-  LOG(INFO, "new client fd= %d maps to reactor[%02d]", client_connection->GetFd(), idx);
+  LOG(ERROR, "new client fd= %d maps to reactor[%02d]", client_connection->GetFd(), idx);
   client_connection->SetLooper(__reactors[idx]);
-  client_connection->Setevent(POLL_READ | POLL_ET);
   __reactors[idx]->AddConnection(std::move(client_connection));
+  LOG(WARNING, "accept client completed");
 }
 
 // 收到client的信息就刷新链接的维持时间
 void Acceptor::BaseHandleCallBack(Connection *client_connection) {
-  auto client_fd = client_connection->GetSocket()->Getfd();
+  int client_fd = client_connection->GetSocket()->Getfd();
   if (client_connection->GetLooper()) {
     client_connection->GetLooper()->RefreshConnection(client_fd);
   }
@@ -56,10 +60,13 @@ void Acceptor::SetCustomeHandleCallBack(std::function<void(Connection *)> custom
     callback(std::forward<decltype(connection)>(connection));
     BaseHandleCallBack(std::forward<decltype(connection)>(connection));
   };
+  LOG(WARNING, "set complete!");
 }
 
 auto Acceptor::GetCustomeAcceptCallBack() const -> std::function<void(Connection *)> { return custome_accept_callback; }
 
 auto Acceptor::GetCustomeHandleCallBack() const -> std::function<void(Connection *)> { return custome_handle_callback; }
+
+auto Acceptor::GetAcceptorConnection() noexcept -> Connection * { return this->__acceptor_connection.get(); }
 
 }  // namespace what::YI_SERVER

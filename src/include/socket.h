@@ -23,7 +23,7 @@ class Socket {
 
   void Bind(NetAddress &, bool is_reusable);
 
-  void Listen(NetAddress &);
+  void Listen();
 
   int Accept(NetAddress &);
 

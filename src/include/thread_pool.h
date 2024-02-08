@@ -27,7 +27,7 @@ class ThreadPool {
 
   template <class Function, class... ARGS>
   decltype(auto) Submit(Function &&fucntino, ARGS &&...args) {
-    if (is_exit.load(std::memory_order_acquire)) {
+    if (is_exit) {
       LOG(ERROR, "thread_pool is exit");
       throw std::runtime_error("thread_pool has been exited");
     }

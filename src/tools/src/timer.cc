@@ -54,7 +54,7 @@ void Timer::SingleTimer::Run() {
 auto Timer::SingleTimer::Is_Expired() const -> bool { return NowSinceEpoch() >= __expire_time; }
 /*-------------------- Timer --------------------*/
 Timer::Timer() : __timer_fd(timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK)) {
-  if (__timer_fd == -1) {
+  if (__timer_fd < 0) {
     LOG(ERROR, "error in Timer constructor can not create timer_fd");
     exit(EXIT_FAILURE);
   }
@@ -65,9 +65,9 @@ Timer::Timer() : __timer_fd(timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NO
 
 void Timer::handleRead() {  // Timer 的 回调函数
   int expired_times;
-  size_t read_bytes = read(__timer_fd, &expired_times, sizeof expired_times);
+  ssize_t read_bytes = read(__timer_fd, &expired_times, sizeof(expired_times));
   if (read_bytes != 8) {  // 对于定时器的读取 一定是 8字节 如果返回值 != 8则说明出现了错误
-    LOG(ERROR, "Timer::handleRead() should read 8 bytes data");
+    LOG(ERROR, "Timer::handleRead() should read 8 bytes data but: %lu", read_bytes);
   }
   auto ready_timers = getExpiredSingleTimer();
   for (auto &item : ready_timers) {
@@ -79,8 +79,10 @@ auto Timer::NextExpiredTime() const -> uint64_t {
   if (__timer_queue.empty()) {
     return 0;
   }
-  return __timer_queue.begin()->second->GetExpireTime();
+  return __timer_queue.begin()->first->GetExpireTime();
 }
+
+auto Timer::GetTimerConnection() -> YI_SERVER::Connection * { return __timer_connection.get(); }
 
 auto Timer::AddSingleTimer(uint64_t expired_from_now, const std::function<void()> &call_back) -> SingleTimer * {
   std::unique_lock<std::mutex> lock(locker);
@@ -96,18 +98,18 @@ auto Timer::AddSingleTimer(uint64_t expired_from_now, const std::function<void()
 }
 
 auto Timer::RemoveSingleTimer(SingleTimer *target_timer) -> bool {
+  std::unique_lock<std::mutex> lock(locker);
   auto item = __timer_queue.find(target_timer);
-  if (item == __timer_queue.end()) {
-    return false;
+  if (item != __timer_queue.end()) {
+    __timer_queue.erase(item);  // target_timer 已经被析构
+    auto new_next_expire_time = NextExpiredTime();
+    if (new_next_expire_time != __expired_time) {
+      __expired_time = new_next_expire_time;
+      ResetTimerFd(__timer_fd, FromNowInTimeSpec(__expired_time));
+    }
+    return true;
   }
-  __timer_queue.erase(item);  // target_timer 已经被析构
-  target_timer = nullptr;
-  auto new_next_expire_time = NextExpiredTime();
-  if (new_next_expire_time != __expired_time) {
-    __expired_time = new_next_expire_time;
-    ResetTimerFd(__timer_fd, FromNowInTimeSpec(__expired_time));
-  }
-  return true;
+  return false;
 }
 
 //* bug complete
@@ -115,9 +117,8 @@ auto Timer::RefreshSingleTimer(SingleTimer *target_timer, uint64_t expired_from_
   std::unique_lock<std::mutex> lock(locker);
   auto item = __timer_queue.find(target_timer);
   if (item != __timer_queue.end()) {
-    auto new_timer = std::make_unique<SingleTimer>(expired_from_now, item->second->GetCallBack());
+    auto new_timer = std::make_unique<SingleTimer>(expired_from_now, item->first->GetCallBack());
     auto new_raw_timer = new_timer.get();
-    target_timer = nullptr;
     __timer_queue.erase(item);
     __timer_queue.emplace(new_raw_timer, std::move(new_timer));
     auto new_next_expire_time = NextExpiredTime();
@@ -132,10 +133,10 @@ auto Timer::RefreshSingleTimer(SingleTimer *target_timer, uint64_t expired_from_
 
 auto Timer::getExpiredSingleTimer() -> std::vector<std::unique_ptr<SingleTimer>> {
   std::unique_lock<std::mutex>(locker);  // 加锁
-  auto item = __timer_queue.begin();
   std::vector<std::unique_ptr<SingleTimer>> ready_timer;
+  auto item = __timer_queue.begin();
   while (item != __timer_queue.end()) {
-    if (!item->second->Is_Expired()) break;
+    if (!item->first->Is_Expired()) break;
     ++item;
   }
   for (auto ptr = __timer_queue.begin(); ptr != item; ++ptr) {

@@ -1,6 +1,7 @@
 #include "../include/poller.h"
 #include "../include/connection.h"
 #include "../tools/include/log.h"
+#include "../tools/include/log_what.hpp"
 
 namespace what::YI_SERVER {
 
@@ -10,22 +11,23 @@ Poller::Poller(uint64_t poll_len) : __poll_size(poll_len) {
     perror("Poller: epoll_create1() error");
     exit(EXIT_FAILURE);
   }
-  __ready_events = reinterpret_cast<epoll_event *>(malloc(sizeof(struct epoll_event) * __poll_size));
-  memset(__ready_events, 0, sizeof __ready_events);
+  __ready_events = new struct epoll_event[poll_len];
+  memset(__ready_events, 0, poll_len * sizeof(struct epoll_event));
 }
 
 Poller::~Poller() {
   if (__poll_fd != -1) {
     close(__poll_fd);
+    delete[] __ready_events;
     __poll_fd = -1;
   }
 }
 
-void Poller::AddConnection(const Connection *connection) {
+void Poller::AddConnection(Connection *connection) {
   assert(connection->GetFd() != -1 && "can not add invalid fd!");
   epoll_event new_event;
-  memset(&new_event, 0, sizeof new_event);
-  new_event.data.ptr = const_cast<Connection *>(connection);
+  memset(&new_event, 0, sizeof(epoll_event));
+  new_event.data.ptr = connection;
   new_event.events = connection->Getevent();
   int ret_number = epoll_ctl(__poll_fd, POLL_ADD, connection->GetFd(), &new_event);
   if (ret_number < 0) {

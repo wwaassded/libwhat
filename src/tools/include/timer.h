@@ -58,9 +58,9 @@ class Timer {
 
   auto GetTimerCount() const -> size_t;  // not thread_safe
 
-  inline auto GetTimerFd() const -> int { return __timer_fd; }
+  auto GetTimerFd() const -> int { return __timer_fd; }
 
-  inline auto GetTimerConnection() const -> const YI_SERVER::Connection * { return __timer_connection.get(); }
+  auto GetTimerConnection() -> YI_SERVER::Connection *;
 
  private:
   struct SingleTimerCompartor {

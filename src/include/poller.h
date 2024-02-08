@@ -25,7 +25,7 @@ class Poller {
 
   ~Poller();
 
-  void AddConnection(const Connection *);
+  void AddConnection(Connection *);
 
   auto Poll(int timeout = -1) -> std::vector<Connection *>;
 

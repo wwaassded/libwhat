@@ -55,7 +55,7 @@ auto Connection::Recv() -> std::pair<ssize_t, bool> {
   int from_fd = GetFd();
   assert(from_fd != -1 && "can not recv with invalid fd!");
   ssize_t total = 0;
-  ssize_t read;
+  ssize_t read = 0;
   unsigned char buffer[TMP_BUFFER_SIZE + 1];
   memset(buffer, 0, sizeof(buffer));
   while (true) {
@@ -78,7 +78,7 @@ auto Connection::Recv() -> std::pair<ssize_t, bool> {
         LOG_ERROR("error in Connection::Recv()");
         LOG(ERROR, "error in Connection::Recv()");
       }
-      return {read, true};
+      return {total, true};
     }
   }
   return {total, false};

@@ -36,7 +36,7 @@ class Looper {
 
  private:
   std::unique_ptr<Poller> __poller;
-  Tools::Timer __timer;
+  mutable Tools::Timer __timer{};
   std::map<int, std::unique_ptr<Connection>> connections;
   std::map<int, Tools::Timer::SingleTimer *> single_timers;
   std::mutex locker;
