@@ -24,5 +24,3 @@
 
 LOG 无法使用 因为没有 链接动态链接库 log_what的动态链接库的获取可以参看 log_what项目
 
-参考：https://github.com/YukunJ/Turtle
->>>>>>> 98e7c5a59a4edb207a96a6473c861657917ac016
