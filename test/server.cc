@@ -12,11 +12,13 @@
 
 using namespace what::YI_SERVER;
 
-int main() {
+int main()
+{
   NetAddress local_address("127.0.0.1", 6789);
   Server echo_server(local_address);
   echo_server
-      .OnHandle([&](Connection *client_conn) {
+      .OnHandle([&](Connection *client_conn)
+                {
         LOG(WARNING, "started to handle message from client");
         int from_fd = client_conn->GetFd();
         auto [read, exit] = client_conn->Recv();
@@ -32,8 +34,7 @@ int main() {
           client_conn->Send();
           client_conn->ClearReadBuffer();
         }
-        LOG(INFO, "end to handle message from client");
-      })
+        LOG(INFO, "end to handle message from client"); })
       .Begin();
   return 0;
 }
